@@ -1,5 +1,5 @@
 <?php
-$conn = mysqli_connect('localhost', 'root', '', 'phpdasar');
+$conn = mysqli_connect('localhost', 'root', '', 'kaltim');
 
 function query($query)
 {
@@ -12,13 +12,14 @@ function query($query)
     return $rows;
 }
 
+
 function tambah($data)
 {
     global $conn;
-    $nrp = htmlspecialchars($data['nrp']);
+    $jenis_kelamin = htmlspecialchars($data['jenis_kelamin']);
     $nama = htmlspecialchars($data['nama']);
-    $email = htmlspecialchars($data['email']);
-    $jurusan = htmlspecialchars($data['jurusan']);
+    $usia = htmlspecialchars($data['usia']);
+    $desa = htmlspecialchars($data['desa']);
 
     // upload gambar
     $gambar = upload();
@@ -28,10 +29,10 @@ function tambah($data)
 
     $query = "INSERT INTO mahasiswa VALUES(
             '',
-            '$nrp',
             '$nama',
-            '$email',
-            '$jurusan',
+            '$jenis_kelamin',
+            '$usia',
+            '$desa',
             '$gambar'
         )";
     mysqli_query($conn, $query);
@@ -128,9 +129,60 @@ function cari($keyword)
 {
     $query = "SELECT * FROM mahasiswa WHERE
     nama LIKE '%$keyword%' OR 
-    nrp LIKE '%$keyword%' OR
-    email LIKE '%$keyword%' OR
-    jurusan LIKE '%$keyword%'
+    jenis_kelamin LIKE '%$keyword%' OR
+    usia LIKE '%$keyword%' OR
+    desa LIKE '%$keyword%'
     ";
     return query($query);
+}
+
+if (isset($_POST['updateketerangan'])) {
+    $keterangan = $_POST['keterangan'];
+    $id = $_POST['id'];
+    $kotatable = $_GET['table'];
+    $notelp = $_POST['no_telp'];
+
+
+    $update = mysqli_query($conn, "UPDATE $kotatable SET keterangan='$keterangan', no_telp = '$notelp' WHERE id ='$id'");
+    if ($update) {
+        header(`location:$kotatable.php`);
+    } else {
+        echo 'Gagal';
+        header(`location:$kotatable.php`);
+    }
+}
+if (isset($_GET['samarindatable'])) {
+    $kotatable = $_GET['table'];
+    $desa = $_GET['desa'];
+
+    $table = query("SELECT * FROM $kotatable WHERE desa = '$desa'");
+}
+if (isset($_GET['bontangtable'])) {
+    $kotatable = $_GET['table'];
+    $desa = $_GET['desa'];
+
+    $table = query("SELECT * FROM $kotatable WHERE desa = '$desa'");
+}
+if (isset($_GET['submit'])) {
+    $kotatable = $_GET['table'];
+    $desa = $_GET['desa'];
+    echo $desa;
+
+    $table = query("SELECT * FROM $kotatable WHERE desa = '$desa'");
+}
+
+
+
+function register($data)
+{
+    global $conn;
+
+    $email = strtolower(stripslashes($data["email"]));
+    $password = mysqli_real_escape_string($conn, $data["password"]);
+
+    $password = password_hash($password, PASSWORD_DEFAULT);
+
+    mysqli_query($conn, "INSERT into user values('','$email','$password')");
+
+    return mysqli_affected_rows($conn);
 }
